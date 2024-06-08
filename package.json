@@ -6,8 +6,9 @@
   "scripts": {},
   "keywords": [],
   "author": "Connor Davis <cnnrproton@gmail.com>",
+  "repository": "https://github.com/connor-davis/iris-protocol.git",
   "license": "GPL-3.0",
-  "description": "",
+  "description": "Welcome to the IrisProtocol, attempting to make P2P communication better thanks to https://holepunch.to and more.",
   "dependencies": {
     "b4a": "^1.6.6",
     "hyperdht": "^6.15.1",
