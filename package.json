@@ -1,0 +1,17 @@
+{
+  "name": "iris-protocol",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {},
+  "keywords": [],
+  "author": "Connor Davis <cnnrproton@gmail.com>",
+  "license": "GPL-3.0",
+  "description": "",
+  "dependencies": {
+    "b4a": "^1.6.6",
+    "hyperdht": "^6.15.1",
+    "ndjson": "^2.0.0",
+    "uuid": "^9.0.1"
+  }
+}
