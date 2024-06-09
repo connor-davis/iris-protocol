@@ -17,17 +17,24 @@ await protocol.listen();
 ```
 
 ### Example Client
-
 ```js
+import Constants from "./constants.js";
 import IrisProtocol from "./index.js";
 
 const protocol = new IrisProtocol();
 
-protocol.on("listening", () => {
+protocol.on("listening", async () => {
   console.log(protocol.publicKey.toString("hex"));
 
   protocol.connect(
-    "6fcf71d6bdc2f3b6273b1f656c4fb1552d17f14ed415605b95f9b7e3d932efe5"
+    "328cd0a22bd92c59cf9d226968f5b027a553f3df22c34aab2b2c7cbc59de80e9"
+  );
+
+  protocol.on("connection", () =>
+    protocol.broadcast({
+      type: Constants.MESSAGE,
+      data: { text: "Hello World!" },
+    })
   );
 });
 

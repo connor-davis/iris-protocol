@@ -1,7 +1,6 @@
 import { EventEmitter } from "events";
 import DHT from "hyperdht";
 import Constants from "./constants.js";
-import { v4 } from "uuid";
 
 /**
  * The IrisProtocol is used to connect peers with bi-directionaly communication between one another. This will change to offer more in the future.
@@ -40,44 +39,96 @@ export default class IrisProtocol extends EventEmitter {
    * @param {NoiseSecretStream} connection The connected node.
    */
   _handleServerConnection(connection) {
-    connection.on("data", (raw) => {
-      const packetString = raw.toString();
+    connection.on("data", (rawPacket) => {
+      const packetString = rawPacket.toString();
       const packet = JSON.parse(packetString);
 
-      switch (packet.type) {
-        case Constants.HANDSHAKE:
-          if (this.connectedPublicKeys.includes(packet.data)) break;
+      this.handlePacket(packet, connection);
+    });
+  }
 
-          connection.irisConnectionId = packet.data;
+  handlePacket(packet, connection, isServerPacket = true) {
+    if (isServerPacket) {
+      console.log("server:");
+    } else {
+      console.log("client:");
+    }
 
-          const socket = this.dht.connect(packet.data);
+    console.log(packet);
 
-          this.connectedPublicKeys.push(packet.data);
-          this.connections.push(connection);
+    switch (packet.type) {
+      case Constants.HANDSHAKE:
+        this.emit("connection");
 
-          socket.write(
-            JSON.stringify({
-              type: Constants.HANDSHAKE,
-              data: this.publicKey.toString("hex"),
-            })
+        console.log(`New Connection: ${packet.data}`);
+
+        if (this.connectedPublicKeys.includes(packet.data)) break; // Prevent reconnecting to a node if a connection has already been made.
+
+        connection.irisConnectionId = packet.data;
+
+        this.connect(packet.data);
+
+        break;
+
+      case Constants.BROADCAST:
+        const broadcastPacket = packet.data;
+
+        this.handlePacket(broadcastPacket, connection, isServerPacket);
+
+        this.connections
+          .filter(
+            (_connection) =>
+              _connection.irisConnectionId !== connection.irisConnectionId
+          )
+          .forEach((connection) =>
+            connection.write(JSON.stringify(broadcastPacket))
           );
 
-          break;
-        default:
-          break;
-      }
-    });
+        break;
+
+      case Constants.MESSAGE:
+        this.emit(Constants.MESSAGE, packet.data);
+
+        break;
+
+      case Constants.WAVE:
+        this.connections = this.connections.filter(
+          (_connection) =>
+            _connection.irisConnectionId !== connection.irisConnectionId
+        );
+        this.connectedPublicKeys = this.connectedPublicKeys.filter(
+          (irisConnectionId) => irisConnectionId !== connection.irisConnectionId
+        );
+
+        connection.write(JSON.stringify({ type: Constants.WAVE }));
+        connection.end();
+
+        break;
+
+      default:
+        break;
+    }
 
     connection.on("end", () => {
-      this.connections = this.connections.filter(
-        (_connection) =>
-          _connection.irisConnectionId !== connection.irisConnectionId
-      );
+      console.log(`End Connection: ${connection.irisConnectionId}`);
     });
   }
 
   get publicKey() {
     return this.keyPair.publicKey;
+  }
+
+  /**
+   * This functions receives a packet and broadcasts it to all connections.
+   *
+   * @param {Object} packet This packet will be sent to all connections who will then send to it to their connections as well as receive the same packet for itself.
+   */
+  broadcast(packet) {
+    this.connections.forEach((connection) =>
+      connection.write(
+        JSON.stringify({ type: Constants.BROADCAST, data: packet })
+      )
+    );
   }
 
   async listen() {
@@ -86,6 +137,8 @@ export default class IrisProtocol extends EventEmitter {
 
   connect(topicHex) {
     const socket = this.dht.connect(topicHex);
+
+    socket.irisConnectionId = topicHex;
 
     this.connectedPublicKeys.push(topicHex);
     this.connections.push(socket);
@@ -96,5 +149,22 @@ export default class IrisProtocol extends EventEmitter {
         data: this.publicKey.toString("hex"),
       })
     );
+
+    socket.on("data", (rawPacket) => {
+      const packetString = rawPacket.toString();
+      const packet = JSON.parse(packetString);
+
+      this.handlePacket(packet, socket, false);
+    });
+  }
+
+  end() {
+    this.connections.forEach((connection) => {
+      connection.write(
+        JSON.stringify({
+          type: Constants.WAVE,
+        })
+      );
+    });
   }
 }
