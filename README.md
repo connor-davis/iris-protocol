@@ -5,40 +5,58 @@ Welcome to the IrisProtocol, attempting to make P2P communication better thanks 
 ### Example Server
 
 ```js
-import IrisProtocol from "./index.js";
+import Constants from "../constants.js";
+import { Server } from "../index.js";
 
-const protocol = new IrisProtocol();
+const server = new Server();
 
-protocol.on("listening", () => {
-  console.log(protocol.publicKey.toString("hex"));
+server.events.subscribe((rawPacket) => {
+  const packetString = rawPacket.toString();
+  const packet = JSON.parse(packetString);
+
+  switch (packet.type) {
+    case Constants.HANDSHAKE:
+      console.log(packet);
+      break;
+
+    case Constants.LISTENING:
+      console.log(server.publicKey.toString("hex"));
+      break;
+
+    default:
+      break;
+  }
 });
-
-await protocol.listen();
 ```
 
 ### Example Client
+
 ```js
-import Constants from "./constants.js";
-import IrisProtocol from "./index.js";
+import Constants from "../constants.js";
+import { Client } from "../index.js";
 
-const protocol = new IrisProtocol();
+const client = new Client(
+  "85c6cde9aa65e64cb6714c2fb8aa5c43cf426e1c461ab684fe6d44b0a3cdf7ec"
+);
 
-protocol.on("listening", async () => {
-  console.log(protocol.publicKey.toString("hex"));
+client.events.subscribe((rawPacket) => {
+  const packetString = rawPacket.toString();
+  const packet = JSON.parse(packetString);
 
-  protocol.connect(
-    "328cd0a22bd92c59cf9d226968f5b027a553f3df22c34aab2b2c7cbc59de80e9"
-  );
+  switch (packet.type) {
+    case Constants.LISTENING:
+      console.log(client.publicKey.toString("hex"));
 
-  protocol.on("connection", () =>
-    protocol.broadcast({
-      type: Constants.MESSAGE,
-      data: { text: "Hello World!" },
-    })
-  );
+      client.socket.on("open", () => {
+        client.socket.send(JSON.stringify({ type: Constants.HANDSHAKE }));
+      });
+
+      break;
+
+    default:
+      break;
+  }
 });
-
-await protocol.listen();
 ```
 
 ### Note

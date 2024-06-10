@@ -1,8 +1,6 @@
 const Constants = {
+  LISTENING: "iris/listening",
   HANDSHAKE: "iris/handshake",
-  WAVE: "iris/wave",
-  BROADCAST: "iris/broadcast",
-  MESSAGE: "iris/message",
 };
 
 export default Constants;
