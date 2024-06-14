@@ -5,6 +5,8 @@ Welcome to the IrisProtocol, attempting to make P2P communication better thanks 
 ### Example Server
 
 ```js
+import { existsSync, readFileSync, statSync, statfsSync } from "fs";
+import path from "path";
 import Constants from "../constants.js";
 import { Server } from "../index.js";
 
@@ -14,13 +16,44 @@ server.events.subscribe((rawPacket) => {
   const packetString = rawPacket.toString();
   const packet = JSON.parse(packetString);
 
-  switch (packet.type) {
-    case Constants.HANDSHAKE:
-      console.log(packet);
-      break;
+  console.log("EVENT: " + packetString);
 
+  switch (packet.type) {
     case Constants.LISTENING:
       console.log(server.publicKey.toString("hex"));
+      break;
+
+    default:
+      break;
+  }
+});
+
+server.in.subscribe((rawPacket) => {
+  const packetString = rawPacket.toString();
+  const packet = JSON.parse(packetString);
+
+  console.log("IN: " + packetString);
+
+  switch (packet.type) {
+    case Constants.DOWNLOAD_FILE_REQUEST:
+      const fileName = packet.fileName;
+      const filePath = path.join(process.cwd(), "uploads", fileName);
+      const fileStat = statSync(filePath);
+
+      if (existsSync(filePath)) {
+        (async () => {
+          const publicKey = await server.createFileReadTunnel(filePath);
+
+          server.out.next(
+            JSON.stringify({
+              type: Constants.DOWNLOAD_FILE_ACCEPTED,
+              fsPublicKey: publicKey.toString("hex"),
+              fileSize: fileStat.size,
+            })
+          );
+        })();
+      }
+
       break;
 
     default:
@@ -36,19 +69,23 @@ import Constants from "../constants.js";
 import { Client } from "../index.js";
 
 const client = new Client(
-  "85c6cde9aa65e64cb6714c2fb8aa5c43cf426e1c461ab684fe6d44b0a3cdf7ec"
+  "79dc399bacaa1611418e119e457476f36afbb37aaa3ad51c314a268a88b629be"
 );
 
 client.events.subscribe((rawPacket) => {
   const packetString = rawPacket.toString();
   const packet = JSON.parse(packetString);
 
+  console.log("EVENT: " + packetString);
+
   switch (packet.type) {
     case Constants.LISTENING:
       console.log(client.publicKey.toString("hex"));
 
       client.socket.on("open", () => {
-        client.socket.send(JSON.stringify({ type: Constants.HANDSHAKE }));
+        client.requestFileDownload(
+          "Call of Duty  Modern Warfare 3 (2023) 2024.06.14 - 12.34.49.05.DVR.mp4"
+        );
       });
 
       break;
