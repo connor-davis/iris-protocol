@@ -1,15 +1,19 @@
-import inquirer from "inquirer";
-import Constants from "../constants.js";
-import { Client } from "../index.js";
-import gradient from "gradient-string";
 import figlet from "figlet";
+import gradient from "gradient-string";
+import inquirer from "inquirer";
+import { LISTENING } from "../constants.js";
+import { Client } from "../index.js";
+
+const { textSync } = figlet;
+const { prompt } = inquirer;
+const { pastel } = gradient;
 
 const Choices = {
   DOWNLOAD_FILE: "Download File",
   EXIT: "Exit",
 };
 
-const { publicKey } = await inquirer.prompt({
+const { publicKey } = await prompt({
   type: "input",
   name: "publicKey",
   message: "What is the host's public key?",
@@ -22,7 +26,7 @@ client.events.subscribe((rawPacket) => {
   const packet = JSON.parse(packetString);
 
   switch (packet.type) {
-    case Constants.LISTENING:
+    case LISTENING:
       client.socket.on("open", () => {
         (async () => {
           await app();
@@ -37,9 +41,9 @@ client.events.subscribe((rawPacket) => {
 const app = async () => {
   process.stdout.write("\x1Bc");
 
-  console.log(gradient.pastel.multiline(figlet.textSync("IrisProtocol")));
+  console.log(pastel.multiline(textSync("IrisProtocol")));
 
-  const { option } = await inquirer.prompt({
+  const { option } = await prompt({
     type: "list",
     name: "option",
     message: "What would you like to do?",
@@ -51,7 +55,7 @@ const app = async () => {
       const files = await client.getRemoteFiles();
 
       if (files.length > 0) {
-        const { fileName } = await inquirer.prompt({
+        const { fileName } = await prompt({
           type: "list",
           name: "fileName",
           message: "Which file do you want to download?",

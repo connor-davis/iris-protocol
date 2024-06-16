@@ -10,4 +10,14 @@ const Constants = {
   DOWNLOAD_FILE_ACCEPTED: "iris/download-file-accepted",
 };
 
+export const REFRESH_CONSOLE = Constants.REFRESH_CONSOLE;
+export const LISTENING = Constants.LISTENING;
+export const HANDSHAKE = Constants.HANDSHAKE;
+export const MESSAGE = Constants.MESSAGE;
+export const PROGRESS = Constants.PROGRESS;
+export const FILE_LIST_REQUEST = Constants.FILE_LIST_REQUEST;
+export const FILE_LIST_ACCEPTED = Constants.FILE_LIST_ACCEPTED;
+export const DOWNLOAD_FILE_REQUEST = Constants.DOWNLOAD_FILE_REQUEST;
+export const DOWNLOAD_FILE_ACCEPTED = Constants.DOWNLOAD_FILE_ACCEPTED;
+
 export default Constants;

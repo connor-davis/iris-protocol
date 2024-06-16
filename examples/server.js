@@ -1,9 +1,13 @@
-import Constants from "../constants.js";
-import { Server } from "../index.js";
 import figlet from "figlet";
-import inquirer from "inquirer";
 import gradient from "gradient-string";
-import path from "path";
+import inquirer from "inquirer";
+import { basename } from "path";
+import { REFRESH_CONSOLE } from "../constants.js";
+import { Server } from "../index.js";
+
+const { textSync } = figlet;
+const { prompt } = inquirer;
+const { pastel, fruit } = gradient;
 
 const server = new Server();
 
@@ -19,7 +23,7 @@ server.events.subscribe((rawPacket) => {
   const packet = JSON.parse(packetString);
 
   switch (packet.type) {
-    case Constants.REFRESH_CONSOLE:
+    case REFRESH_CONSOLE:
       (async () => {
         await app();
       })();
@@ -33,9 +37,9 @@ server.events.subscribe((rawPacket) => {
 const app = async () => {
   process.stdout.write("\x1Bc");
 
-  console.log(gradient.pastel.multiline(figlet.textSync("IrisProtocol")));
+  console.log(pastel.multiline(textSync("IrisProtocol")));
 
-  const { option } = await inquirer.prompt({
+  const { option } = await prompt({
     type: "list",
     name: "option",
     message: "What would you like to do?",
@@ -44,13 +48,13 @@ const app = async () => {
 
   switch (option) {
     case Choices.ADD_FILE:
-      const { filePath1 } = await inquirer.prompt({
+      const { filePath1 } = await prompt({
         type: "input",
         name: "filePath1",
         message: "Drag the file onto the terminal:",
       });
 
-      const fileName1 = path.basename(filePath1);
+      const fileName1 = basename(filePath1);
 
       server.addFile(filePath1, fileName1);
 
@@ -58,7 +62,7 @@ const app = async () => {
 
     case Choices.REMOVE_FILE:
       if (server.files.length > 0) {
-        const { fileName2 } = await inquirer.prompt({
+        const { fileName2 } = await prompt({
           type: "list",
           name: "fileName2",
           message: "Which file would you like to remove?",
@@ -71,11 +75,9 @@ const app = async () => {
       break;
 
     case Choices.GET_PUBLIC_KEY:
-      console.log(
-        "Public Key: " + gradient.fruit(server.publicKey.toString("hex"))
-      );
+      console.log("Public Key: " + fruit(server.publicKey.toString("hex")));
 
-      await inquirer.prompt({
+      await prompt({
         type: "confirm",
         name: "option",
         message: "Have you copied your public key?",
@@ -93,4 +95,6 @@ const app = async () => {
   await app();
 };
 
-await app();
+(async () => {
+  await app();
+})();
