@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   REFRESH_CONSOLE: "iris/refresh-console",
   LISTENING: "iris/listening",
   HANDSHAKE: "iris/handshake",

@@ -1,20 +1,13 @@
-import figlet from "figlet";
-import gradient from "gradient-string";
-import inquirer from "inquirer";
-import IrisProtocol from "../index.mjs";
-
-const { LISTENING } = Constants;
-const { IrisProtocolClient, Constants } = IrisProtocol;
-const { textSync } = figlet;
-const { prompt } = inquirer;
-const { pastel } = gradient;
+const gradient = require("gradient-string");
+const inquirer = require("inquirer");
+const { LISTENING } = require("../constants");
 
 const Choices = {
   DOWNLOAD_FILE: "Download File",
   EXIT: "Exit",
 };
 
-const { publicKey } = await prompt({
+const { publicKey } = await inquirer.prompt({
   type: "input",
   name: "publicKey",
   message: "What is the host's public key?",
@@ -42,9 +35,9 @@ client.events.subscribe((rawPacket) => {
 const app = async () => {
   process.stdout.write("\x1Bc");
 
-  console.log(pastel.multiline(textSync("IrisProtocol")));
+  console.log(gradient.pastel.multiline(figlet.textSync("IrisProtocol")));
 
-  const { option } = await prompt({
+  const { option } = await inquirer.prompt({
     type: "list",
     name: "option",
     message: "What would you like to do?",
@@ -56,7 +49,7 @@ const app = async () => {
       const files = await client.getRemoteFiles();
 
       if (files.length > 0) {
-        const { fileName } = await prompt({
+        const { fileName } = await inquirer.prompt({
           type: "list",
           name: "fileName",
           message: "Which file do you want to download?",
