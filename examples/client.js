@@ -24,11 +24,9 @@ const figlet = require("figlet");
 
     switch (packet.type) {
       case LISTENING:
-        client.socket.on("open", () => {
-          (async () => {
-            await app();
-          })();
-        });
+        (async () => {
+          await app();
+        })();
         break;
       default:
         break;
