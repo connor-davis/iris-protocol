@@ -1,9 +1,10 @@
 import figlet from "figlet";
 import gradient from "gradient-string";
 import inquirer from "inquirer";
-import { LISTENING } from "../constants.js";
-import { Client } from "../index.js";
+import IrisProtocol from "../index.mjs";
 
+const { LISTENING } = Constants;
+const { IrisProtocolClient, Constants } = IrisProtocol;
 const { textSync } = figlet;
 const { prompt } = inquirer;
 const { pastel } = gradient;
@@ -19,7 +20,7 @@ const { publicKey } = await prompt({
   message: "What is the host's public key?",
 });
 
-const client = new Client(publicKey);
+const client = new IrisProtocolClient(publicKey);
 
 client.events.subscribe((rawPacket) => {
   const packetString = rawPacket.toString();

@@ -1,8 +1,7 @@
 {
   "name": "iris-protocol",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "index.js",
-  "type": "module",
   "scripts": {},
   "keywords": [],
   "author": "Connor Davis <cnnrproton@gmail.com>",

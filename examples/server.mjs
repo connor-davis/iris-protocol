@@ -2,14 +2,15 @@ import figlet from "figlet";
 import gradient from "gradient-string";
 import inquirer from "inquirer";
 import { basename } from "path";
-import { REFRESH_CONSOLE } from "../constants.js";
-import { Server } from "../index.js";
+import IrisProtocol from "../index.mjs";
 
+const { IrisProtocolServer, Constants } = IrisProtocol;
+const { REFRESH_CONSOLE } = Constants;
 const { textSync } = figlet;
 const { prompt } = inquirer;
 const { pastel, fruit } = gradient;
 
-const server = new Server();
+const server = new IrisProtocolServer();
 
 const Choices = {
   ADD_FILE: "Add File",
