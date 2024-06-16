@@ -2,6 +2,12 @@
 
 Welcome to the IrisProtocol, attempting to make P2P communication better thanks to [HyperCore Protocol](https://holepunch.to) and more.
 
+### Install
+
+```bash
+npm i iris-protocol@latest
+```
+
 ### Example Server
 
 ```js
