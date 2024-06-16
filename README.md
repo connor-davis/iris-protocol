@@ -181,7 +181,3 @@ const app = async () => {
   await app();
 };
 ```
-
-### Note
-
-The above examples show how to setup a client and a server instance and connect. However, that does not mean each is a client and a server - they are both. The are able to communicate bi-directionally.
