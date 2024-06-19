@@ -11,179 +11,126 @@ npm i iris-protocol@latest
 ### Example Server
 
 ```js
-import Constants from "../constants.js";
-import { Server } from "../index.js";
-import figlet from "figlet";
-import inquirer from "inquirer";
-import gradient from "gradient-string";
-import path from "path";
+const { input, password } = require("@inquirer/prompts");
+const { IrisProtocolSwarm, IrisProtocolUser, Constants } = require("..");
+const figlet = require("figlet");
+const gradient = require("gradient-string");
+const path = require("path");
 
-const server = new Server();
+(async () => {
+  console.log(gradient.passion(figlet.textSync("IrisProtocol")));
 
-const Choices = {
-  ADD_FILE: "Add File",
-  REMOVE_FILE: "Remove File",
-  GET_PUBLIC_KEY: "Get Public Key",
-  EXIT: "Exit",
-};
+  const user = new IrisProtocolUser("connor-davis");
 
-server.events.subscribe((rawPacket) => {
-  const packetString = rawPacket.toString();
-  const packet = JSON.parse(packetString);
+  if (!user.password) {
+    let newPassword = await password({
+      message: "What is the password for " + user.username + "?",
+      theme: {
+        prefix: "",
+      },
+      mask: "*",
+    });
 
-  switch (packet.type) {
-    case Constants.REFRESH_CONSOLE:
-      (async () => {
-        await app();
-      })();
+    user.setPassword(newPassword);
 
-      break;
-    default:
-      break;
+    user.save();
   }
-});
 
-const app = async () => {
-  process.stdout.write("\x1Bc");
-
-  console.log(gradient.pastel.multiline(figlet.textSync("IrisProtocol")));
-
-  const { option } = await inquirer.prompt({
-    type: "list",
-    name: "option",
-    message: "What would you like to do?",
-    choices: Object.values(Choices),
+  let confirmPassword = await password({
+    message: "Confirm the password for " + user.username + "?",
+    theme: {
+      prefix: "",
+    },
+    mask: "*",
   });
 
-  switch (option) {
-    case Choices.ADD_FILE:
-      const { filePath1 } = await inquirer.prompt({
-        type: "input",
-        name: "filePath1",
-        message: "Drag the file onto the terminal:",
-      });
+  if (!user.verifyPassword(confirmPassword))
+    return console.log("🔥 Failed to verify password.");
 
-      const fileName1 = path.basename(filePath1);
+  console.log(" Welcome to IrisProtocol! ❤️");
 
-      server.addFile(filePath1, fileName1);
+  let sessionName = await input({
+    message: "What would you like to make your session name?",
+  });
 
-      break;
+  let server = new IrisProtocolSwarm(sessionName, user);
 
-    case Choices.REMOVE_FILE:
-      if (server.files.length > 0) {
-        const { fileName2 } = await inquirer.prompt({
-          type: "list",
-          name: "fileName2",
-          message: "Which file would you like to remove?",
-          choices: server.files.map((file) => file.fileName),
-        });
+  console.log(" Initializing...");
 
-        server.removeFile(fileName2);
-      }
+  await server.listen();
 
-      break;
+  console.log(" Running! 🚀");
 
-    case Choices.GET_PUBLIC_KEY:
-      console.log(
-        "Public Key: " + gradient.fruit(server.publicKey.toString("hex"))
-      );
+  server.internal.subscribe((packet) => console.log(packet));
 
-      await inquirer.prompt({
-        type: "confirm",
-        name: "option",
-        message: "Have you copied your public key?",
-      });
+  // const fileId = server.files.addFile(
+  //   path.join(process.cwd(), "Uploads", "test.txt")
+  // );
 
-      break;
+  // console.log("File ID: " + fileId);
 
-    case Choices.EXIT:
-      process.exit(1);
+  // const downloadPublicKey = await server.files.uploadFile(fileId);
 
-    default:
-      break;
-  }
-
-  await app();
-};
-
-await app();
+  // console.log("Download Public Key: " + downloadPublicKey);
+})();
 ```
 
 ### Example Client
 
 ```js
-import inquirer from "inquirer";
-import Constants from "../constants.js";
-import { Client } from "../index.js";
-import gradient from "gradient-string";
-import figlet from "figlet";
+const { input, password } = require("@inquirer/prompts");
+const { IrisProtocolSwarm, IrisProtocolUser, Constants } = require("..");
+const figlet = require("figlet");
+const gradient = require("gradient-string");
 
-const Choices = {
-  DOWNLOAD_FILE: "Download File",
-  EXIT: "Exit",
-};
+(async () => {
+  console.log(gradient.passion(figlet.textSync("IrisProtocol")));
 
-const { publicKey } = await inquirer.prompt({
-  type: "input",
-  name: "publicKey",
-  message: "What is the host's public key?",
-});
+  const user = new IrisProtocolUser("connor-test");
 
-const client = new Client(publicKey);
+  if (!user.password) {
+    let newPassword = await password({
+      message: "What is the password for " + user.username + "?",
+      theme: {
+        prefix: "",
+      },
+      mask: "*",
+    });
 
-client.events.subscribe((rawPacket) => {
-  const packetString = rawPacket.toString();
-  const packet = JSON.parse(packetString);
+    user.setPassword(newPassword);
 
-  switch (packet.type) {
-    case Constants.LISTENING:
-      client.socket.on("open", () => {
-        (async () => {
-          await app();
-        })();
-      });
-      break;
-    default:
-      break;
+    user.save();
   }
-});
 
-const app = async () => {
-  process.stdout.write("\x1Bc");
-
-  console.log(gradient.pastel.multiline(figlet.textSync("IrisProtocol")));
-
-  const { option } = await inquirer.prompt({
-    type: "list",
-    name: "option",
-    message: "What would you like to do?",
-    choices: Object.values(Choices),
+  let confirmPassword = await password({
+    message: "Confirm the password for " + user.username + "?",
+    theme: {
+      prefix: "",
+    },
+    mask: "*",
   });
 
-  switch (option) {
-    case Choices.DOWNLOAD_FILE:
-      const files = await client.getRemoteFiles();
+  if (!user.verifyPassword(confirmPassword))
+    return console.log("🔥 Failed to verify password.");
 
-      if (files.length > 0) {
-        const { fileName } = await inquirer.prompt({
-          type: "list",
-          name: "fileName",
-          message: "Which file do you want to download?",
-          choices: files.map((file) => file.fileName),
-        });
+  console.log(" Welcome to IrisProtocol! ❤️");
 
-        await client.downloadFile(fileName, console.log);
-      }
+  let sessionName = await input({
+    message: "What would you like to make your session name?",
+  });
 
-      break;
+  let server = new IrisProtocolSwarm(sessionName, user, false);
 
-    case Choices.EXIT:
-      process.exit(1);
+  console.log(" Initializing...");
 
-    default:
-      break;
-  }
+  await server.listen();
 
-  await app();
-};
+  console.log(" Running! 🚀");
+
+  server.internal.subscribe((packet) => console.log(packet));
+
+  // server.files.downloadFile(
+  //   "3facee3f0ac2b9037b309bcf1016df0377a33cc0786c1d813362c7563aeb7728"
+  // );
+})();
 ```
