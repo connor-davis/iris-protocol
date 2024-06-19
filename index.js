@@ -1,9 +1,13 @@
 const Constants = require("./constants");
-const IrisProtocolClient = require("./lib/protocolClient");
-const IrisProtocolServer = require("./lib/protocolServer");
+const IrisProtocolUser = require("./lib/user");
+const IrisProtocolSwarm = require("./lib/swarm");
+const IrisProtocolPacket = require("./lib/packet");
+const IrisProtocolFiles = require("./lib/files");
 
 module.exports = {
-  IrisProtocolServer,
-  IrisProtocolClient,
+  IrisProtocolSwarm,
+  IrisProtocolUser,
+  IrisProtocolPacket,
+  IrisProtocolFiles,
   Constants,
 };

@@ -1,6 +1,6 @@
 {
   "name": "iris-protocol",
-  "version": "1.2.7",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {},
   "keywords": [],
@@ -9,13 +9,18 @@
   "license": "GPL-3.0",
   "description": "Welcome to the IrisProtocol, attempting to make P2P communication better thanks to https://holepunch.to and more.",
   "dependencies": {
-    "figlet": "^1.7.0",
-    "gradient-string": "^2.0.2",
+    "b4a": "^1.6.6",
+    "bcrypt": "^5.1.1",
     "hyperdht": "^6.15.1",
-    "inquirer": "^8.0.0",
+    "hyperswarm": "^4.7.15",
     "progress-stream": "^2.0.0",
     "pump": "^3.0.0",
     "rxjs": "^7.8.1",
-    "ws": "^8.17.0"
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@inquirer/prompts": "^5.0.5",
+    "figlet": "^1.7.0",
+    "gradient-string": "^2.0.2"
   }
 }
