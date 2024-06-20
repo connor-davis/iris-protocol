@@ -1,8 +1,7 @@
-const { input, password } = require("@inquirer/prompts");
+const { password } = require("@inquirer/prompts");
 const { User, Network, Constants } = require("..");
 const figlet = require("figlet");
 const gradient = require("gradient-string");
-const path = require("path");
 
 (async () => {
   console.log(gradient.passion(figlet.textSync("IrisProtocol")));
