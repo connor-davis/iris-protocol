@@ -6,6 +6,7 @@ module.exports = {
   PING: "iris/ping",
   PEER_CONNECTED: "iris/peer-connected",
   PEER_DISCONNECTED: "iris/peer-disconnected",
+  NETWORK_INFORMATION: "iris/network-information",
   MESSAGE: "iris/message",
   PROGRESS: "iris/progress",
   REQUEST_FILES: "iris/request-files",

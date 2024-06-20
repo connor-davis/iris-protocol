@@ -1,12 +1,12 @@
 const { input, password } = require("@inquirer/prompts");
-const { IrisProtocolSwarm, IrisProtocolUser, Constants } = require("..");
+const { Network, User, Constants } = require("..");
 const figlet = require("figlet");
 const gradient = require("gradient-string");
 
 (async () => {
   console.log(gradient.passion(figlet.textSync("IrisProtocol")));
 
-  const user = new IrisProtocolUser("connor-test");
+  const user = new User("connor-test");
 
   if (!user.password) {
     let newPassword = await password({
@@ -35,21 +35,37 @@ const gradient = require("gradient-string");
 
   console.log(" Welcome to IrisProtocol! ❤️");
 
-  let sessionName = await input({
-    message: "What would you like to make your session name?",
+  const publicKey = await input({
+    message: "What is the sessions public key?",
   });
 
-  let server = new IrisProtocolSwarm(sessionName, user, false);
+  console.log(" Joining session with public key: " + publicKey);
 
-  console.log(" Initializing...");
+  const network = new Network();
 
-  await server.listen();
+  network.connect(publicKey);
 
-  console.log(" Running! 🚀");
+  network.events.subscribe((event) => {
+    switch (event.type) {
+      case Constants.LISTENING:
+        console.log(" Joined session with public key: " + publicKey);
 
-  server.internal.subscribe((packet) => console.log(packet));
+        break;
+      default:
+        break;
+    }
+  });
 
-  // server.files.downloadFile(
-  //   "3facee3f0ac2b9037b309bcf1016df0377a33cc0786c1d813362c7563aeb7728"
-  // );
+  network.in.subscribe((packet) => {
+    switch (packet.type) {
+      case Constants.NETWORK_INFORMATION:
+        const data = packet.data;
+
+        user.saveSession(data.metadata.username, { publicKey });
+
+        break;
+      default:
+        break;
+    }
+  });
 })();
