@@ -1,5 +1,5 @@
 const { input, password } = require("@inquirer/prompts");
-const { IrisProtocolSwarm, IrisProtocolUser, Constants } = require("..");
+const { User, Network, Constants } = require("..");
 const figlet = require("figlet");
 const gradient = require("gradient-string");
 const path = require("path");
@@ -7,7 +7,7 @@ const path = require("path");
 (async () => {
   console.log(gradient.passion(figlet.textSync("IrisProtocol")));
 
-  const user = new IrisProtocolUser("connor-davis");
+  const user = new User("connor-davis");
 
   if (!user.password) {
     let newPassword = await password({
@@ -35,28 +35,25 @@ const path = require("path");
     return console.log("🔥 Failed to verify password.");
 
   console.log(" Welcome to IrisProtocol! ❤️");
+  console.log(" Starting your users session");
 
-  let sessionName = await input({
-    message: "What would you like to make your session name?",
+  const session = user.session;
+
+  const network = new Network(session.keyPair, user);
+
+  network.events.subscribe((event) => {
+    switch (event.type) {
+      case Constants.LISTENING:
+        console.log(
+          "🚀 Session listening on public key: " +
+            session.keyPair.publicKey.toString("hex")
+        );
+
+        break;
+      default:
+        break;
+    }
   });
 
-  let server = new IrisProtocolSwarm(sessionName, user);
-
-  console.log(" Initializing...");
-
-  await server.listen();
-
-  console.log(" Running! 🚀");
-
-  server.internal.subscribe((packet) => console.log(packet));
-
-  // const fileId = server.files.addFile(
-  //   path.join(process.cwd(), "Uploads", "test.txt")
-  // );
-
-  // console.log("File ID: " + fileId);
-
-  // const downloadPublicKey = await server.files.uploadFile(fileId);
-
-  // console.log("Download Public Key: " + downloadPublicKey);
+  await network.listen();
 })();
